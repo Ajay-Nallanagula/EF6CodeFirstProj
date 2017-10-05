@@ -3,3 +3,7 @@
 ################################################################################
 
 /.vs
+/EF6CodeFirstApporach/bin
+/EF6CodeFirstApporach/obj
+/EF6CodeFirstApporach.Tests
+/packages
