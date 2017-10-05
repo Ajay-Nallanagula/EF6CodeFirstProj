@@ -14,6 +14,8 @@ namespace EF6CodeFirstApporach.Models
 
         public DateTime EnrollmentDate { get; set; }
 
+        public string EmailAddress { get; set; }
+
         //Property is virtual because it helps in lazy loading
         public virtual ICollection<Enrollment> Enrollments { get; set; } //Navigation Property
 

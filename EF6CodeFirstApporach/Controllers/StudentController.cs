@@ -8,6 +8,7 @@ using System.Web;
 using System.Web.Mvc;
 using EF6CodeFirstApporach.Dal;
 using EF6CodeFirstApporach.Models;
+using System.Diagnostics;
 
 namespace EF6CodeFirstApporach.Controllers
 {
@@ -49,11 +50,19 @@ namespace EF6CodeFirstApporach.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Create([Bind(Include = "Id,FirstName,LastName,EnrollmentDate")] Student student)
         {
-            if (ModelState.IsValid)
+            try
             {
-                db.Students.Add(student);
-                db.SaveChanges();
-                return RedirectToAction("Index");
+                if (ModelState.IsValid)
+                {
+                    db.Students.Add(student);
+                    db.SaveChanges();
+                    return RedirectToAction("Index");
+                }
+            }
+            catch(DataException ex)
+            {
+                Trace.WriteLine(ex.Message);
+                ModelState.AddModelError("UNABLE TO SAVE:","Unable to save the data at this moment, Contact your system Administrator");
             }
 
             return View(student);
