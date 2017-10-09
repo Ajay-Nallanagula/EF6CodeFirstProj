@@ -9,6 +9,8 @@ using System.Web.Mvc;
 using EF6CodeFirstApporach.Dal;
 using EF6CodeFirstApporach.Models;
 using System.Diagnostics;
+using System.Collections;
+using PagedList;
 
 namespace EF6CodeFirstApporach.Controllers
 {
@@ -17,9 +19,61 @@ namespace EF6CodeFirstApporach.Controllers
         private SchoolContext db = new SchoolContext();
 
         // GET: Student
-        public ActionResult Index()
+        public ActionResult Index(string sortOrder, string currentFilter, string searchString, int? page)
         {
-            return View(db.Students.ToList());
+            ViewBag.CurrentSort = sortOrder;
+            ViewBag.NameSort = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
+            ViewBag.DateSort = sortOrder == "Date" ? "date_desc" : "Date";
+
+            if (!String.IsNullOrWhiteSpace(searchString))
+                page = 1;
+            else
+                searchString = currentFilter;
+
+            ViewBag.CurrentFilter = searchString;
+
+            var students = from student in db.Students select student;
+
+            if (!String.IsNullOrWhiteSpace(searchString))
+            {
+                students = FilterNames(searchString.ToLower(), students);
+            }
+
+           
+
+            students = SortStudentList(sortOrder, students);
+
+            int pageSize = 3;
+            int pageNumber = (page ?? 1);
+            return View(students.ToPagedList(pageNumber, pageSize));
+            //return View(students.ToList());
+        }
+
+        private IQueryable<Student> FilterNames(string searchString, IQueryable<Student> students)
+        {
+            return students.Where(m => m.FirstName.ToLower().Contains(searchString) || m.LastName.ToLower().Contains(searchString)); 
+        }
+
+        private IQueryable<Student> SortStudentList(string sortOrder,IQueryable<Student> students)
+        {
+           // var students = from student in db.Students select student; //students is of type IQueryable<Students> here we are using Linq To Entites
+
+            switch (sortOrder)
+            {
+                case "name_desc":
+                    students = students.OrderByDescending(m => m.LastName);
+                    break;
+                case "Date":
+                    students = students.OrderBy(m => m.EnrollmentDate);
+                    break;
+                case "date_desc":
+                    students = students.OrderByDescending(m => m.EnrollmentDate);
+                    break;
+                default:
+                    students = students.OrderBy(m => m.LastName);
+                    break;
+            }
+            return students;
         }
 
         // GET: Student/Details/5
@@ -114,7 +168,7 @@ namespace EF6CodeFirstApporach.Controllers
         }
 
         // GET: Student/Delete/5
-        public ActionResult Delete(int? id,bool saveChagesError=false)
+        public ActionResult Delete(int? id, bool saveChagesError = false)
         {
             if (id == null)
             {
@@ -148,7 +202,7 @@ namespace EF6CodeFirstApporach.Controllers
                 db.Entry(studentToDelete).State = EntityState.Deleted;
                 db.SaveChanges();
             }
-            catch(DataException ex)
+            catch (DataException ex)
             {
                 Trace.WriteLine(ex.Message);
                 RedirectToAction("Delete", new { Id = id, saveChagesError = true });
