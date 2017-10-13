@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace EF6CodeFirstApporach.Dal
 {
+    /// <summary>
+    /// This will set up some intial data in database , when the DB is created for first time. This can be enabled(Dev env) disabled(Prod env) from web.config using "disableDatabaseInitialization" property inside <entityframework><contexts></contexts></entityframework>
+    /// </summary>
     public class SchoolInitializer : DropCreateDatabaseIfModelChanges<SchoolContext>
     {
         protected override void Seed(SchoolContext schoolContext)

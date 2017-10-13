@@ -11,6 +11,7 @@ using EF6CodeFirstApporach.Models;
 using System.Diagnostics;
 using System.Collections;
 using PagedList;
+using System.Data.Entity.Infrastructure;
 
 namespace EF6CodeFirstApporach.Controllers
 {
@@ -32,21 +33,21 @@ namespace EF6CodeFirstApporach.Controllers
 
             ViewBag.CurrentFilter = searchString;
 
-            var students = from student in db.Students select student;
+            //Uncomment the below code If you want to see the SQL Queries that are been sent to database by EF6 
+           // db.Database.Log = p=> { Trace.WriteLine(p); };
+           var students = from student in db.Students select student;
+           // db.SaveChanges();
 
             if (!String.IsNullOrWhiteSpace(searchString))
             {
                 students = FilterNames(searchString.ToLower(), students);
             }
 
-           
-
             students = SortStudentList(sortOrder, students);
 
             int pageSize = 3;
             int pageNumber = (page ?? 1);
             return View(students.ToPagedList(pageNumber, pageSize));
-            //return View(students.ToList());
         }
 
         private IQueryable<Student> FilterNames(string searchString, IQueryable<Student> students)
@@ -113,12 +114,15 @@ namespace EF6CodeFirstApporach.Controllers
                     return RedirectToAction("Index");
                 }
             }
-            catch (DataException ex)
+            catch (RetryLimitExceededException ex)
             {
                 Trace.WriteLine(ex.Message);
                 ModelState.AddModelError("UNABLE TO SAVE:", "Unable to save the data at this moment, Contact your system Administrator");
             }
-
+            catch (Exception ex)
+            {
+                Trace.WriteLine(ex.Message);
+            }
             return View(student);
         }
 
@@ -159,7 +163,7 @@ namespace EF6CodeFirstApporach.Controllers
                     return RedirectToAction("Index");
                 }
             }
-            catch (Exception ex)
+            catch (RetryLimitExceededException ex)
             {
                 Trace.WriteLine(ex.Message);
                 ModelState.AddModelError("EditError", "Unable to edit the record this time, Contact SystemAdminstrator");
@@ -202,7 +206,12 @@ namespace EF6CodeFirstApporach.Controllers
                 db.Entry(studentToDelete).State = EntityState.Deleted;
                 db.SaveChanges();
             }
-            catch (DataException ex)
+            catch (RetryLimitExceededException ex)
+            {
+                Trace.WriteLine(ex.Message);
+                RedirectToAction("Delete", new { Id = id, saveChagesError = true });
+            }
+            catch (Exception ex)
             {
                 Trace.WriteLine(ex.Message);
                 RedirectToAction("Delete", new { Id = id, saveChagesError = true });

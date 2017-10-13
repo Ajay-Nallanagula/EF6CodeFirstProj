@@ -156,11 +156,17 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\StudentController.cs" />
+    <Compile Include="Dal\SchoolConfiguration.cs" />
     <Compile Include="Dal\SchoolContext.cs" />
+    <Compile Include="Dal\SchoolExecutionStrategy.cs" />
     <Compile Include="Dal\SchoolInitializer.cs" />
+    <Compile Include="Dal\SchoolInterceptorLogging.cs" />
+    <Compile Include="Dal\SchoolInterceptorTransientErrors.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Logging\ILogger.cs" />
+    <Compile Include="Logging\SchoolLogger.cs" />
     <Compile Include="Models\Course.cs" />
     <Compile Include="Models\Enrollment.cs" />
     <Compile Include="ViewModel\EnrollmentDateGroup.cs" />
@@ -191,7 +197,9 @@
     <Content Include="Scripts\modernizr-2.6.2.js" />
     <Content Include="Scripts\respond.js" />
     <Content Include="Scripts\respond.min.js" />
-    <Content Include="Web.config" />
+    <Content Include="Web.config">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </Content>
